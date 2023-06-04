@@ -33,6 +33,51 @@ namespace Expressions.Task3.E3SQueryProvider
 
                 return node;
             }
+
+            if ( node.Method.Name == "Equals")
+            {
+                Visit(node.Object);
+                var predicate = node.Arguments[0];
+                _resultStringBuilder.Append("(");
+                Visit(predicate);
+                _resultStringBuilder.Append(")");
+
+                return node;
+            }
+
+            if (node.Method.Name == "StartsWith")
+            {
+                Visit(node.Object);
+                var predicate = node.Arguments[0];
+                _resultStringBuilder.Append("(");
+                Visit(predicate);
+                _resultStringBuilder.Append("*)");
+
+                return node;
+            }
+
+            if (node.Method.Name == "EndsWith")
+            {
+                Visit(node.Object);
+                var predicate = node.Arguments[0];
+                _resultStringBuilder.Append("(*");
+                Visit(predicate);
+                _resultStringBuilder.Append(")");
+
+                return node;
+            }
+
+            if (node.Method.Name == "Contains")
+            {
+                Visit(node.Object);
+                var predicate = node.Arguments[0];
+                _resultStringBuilder.Append("(*");
+                Visit(predicate);
+                _resultStringBuilder.Append("*)");
+
+                return node;
+            }
+
             return base.VisitMethodCall(node);
         }
 
