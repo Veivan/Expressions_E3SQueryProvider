@@ -28,9 +28,10 @@ namespace Expressions.Task3.E3SQueryProvider
             if (node.Method.DeclaringType == typeof(Queryable)
                 && node.Method.Name == "Where")
             {
+                _resultStringBuilder.Append(@"{""statements"": [");
                 var predicate = node.Arguments[1];
                 Visit(predicate);
-
+                _resultStringBuilder.Append(@"]}");
                 return node;
             }
 
@@ -47,11 +48,14 @@ namespace Expressions.Task3.E3SQueryProvider
 
             if (node.Method.Name == "StartsWith")
             {
+                _resultStringBuilder.Append(@"{""query"":");
+                _resultStringBuilder.Append(@"""");
                 Visit(node.Object);
                 var predicate = node.Arguments[0];
                 _resultStringBuilder.Append("(");
                 Visit(predicate);
-                _resultStringBuilder.Append("*)");
+                _resultStringBuilder.Append(@"*)""");
+                _resultStringBuilder.Append("},");
 
                 return node;
             }
@@ -101,12 +105,18 @@ namespace Expressions.Task3.E3SQueryProvider
                     if (changedNode.Right.NodeType != ExpressionType.Constant)
                         throw new NotSupportedException($"Right operand should be constant: {changedNode.NodeType}");
 
+                    _resultStringBuilder.Append(@"{""query"":");
+                    _resultStringBuilder.Append(@"""");
                     Visit(changedNode.Left);
                     _resultStringBuilder.Append("(");
                     Visit(changedNode.Right);
-                    _resultStringBuilder.Append(")");
+                    _resultStringBuilder.Append(@")""");
+                    _resultStringBuilder.Append("},");
                     break;
-
+                case ExpressionType.AndAlso:
+                    Visit(changedNode.Left);
+                    Visit(changedNode.Right);
+                    break;
                 default:
                     throw new NotSupportedException($"Operation '{changedNode.NodeType}' is not supported");
             };

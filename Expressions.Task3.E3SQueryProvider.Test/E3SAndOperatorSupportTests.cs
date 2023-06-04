@@ -12,12 +12,22 @@ using System.Linq;
 using System.Linq.Expressions;
 using Expressions.Task3.E3SQueryProvider.Models.Entities;
 using Xunit;
+using System.Text.Json;
 
 namespace Expressions.Task3.E3SQueryProvider.Test
 {
     public class E3SAndOperatorSupportTests
     {
         #region SubTask 3: AND operator support
+
+        public class E3SQuery
+        {
+             public queryObj[] statements { get; set; }
+        }
+        public class queryObj
+        {
+            public string query { get; set; }
+        }
 
         [Fact]
         public void TestAndQueryable()
@@ -35,7 +45,27 @@ namespace Expressions.Task3.E3SQueryProvider.Test
              */
 
             // todo: create asserts for this test by yourself, because they will depend on your final implementation
-            throw new NotImplementedException("Please implement this test and the appropriate functionality");
+
+            string translated = translator.Translate(expression);
+
+            var options = new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true
+            };
+
+            E3SQuery translatedObj = JsonSerializer.Deserialize<E3SQuery>(translated, options);
+
+            var testString = @"{""statements"": [
+                { ""query"":""Workstation:(EPRUIZHW006)""},
+                { ""query"":""Manager:(John*)""}
+                ]}";
+
+//            var testString2 = "{\"statements\": [{ \"query\":\"Workstation:(EPRUIZHW006)\"},{ \"query\":\"Manager:(John*)\"}]}";
+
+            E3SQuery testedObj = JsonSerializer.Deserialize<E3SQuery>(testString);
+
+            Assert.Equal(testedObj.statements[0].query, translatedObj.statements[0].query);
+            Assert.Equal(testedObj.statements[1].query, translatedObj.statements[1].query);
         }
 
         #endregion
