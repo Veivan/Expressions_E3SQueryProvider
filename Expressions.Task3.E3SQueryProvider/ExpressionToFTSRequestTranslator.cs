@@ -38,23 +38,32 @@ namespace Expressions.Task3.E3SQueryProvider
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
+            BinaryExpression changedNode = node;
+
             switch (node.NodeType)
             {
                 case ExpressionType.Equal:
-                    if (node.Left.NodeType != ExpressionType.MemberAccess)
-                        throw new NotSupportedException($"Left operand should be property or field: {node.NodeType}");
+                    if (node.Left.NodeType == ExpressionType.Constant)
+					{
+                        changedNode = node.Update(node.Right, node.Conversion, node.Left);
+                        Visit(changedNode);
+                        break;
+                    }
 
-                    if (node.Right.NodeType != ExpressionType.Constant)
-                        throw new NotSupportedException($"Right operand should be constant: {node.NodeType}");
+                    if (changedNode.Left.NodeType != ExpressionType.MemberAccess)
+                        throw new NotSupportedException($"Left operand should be property or field: {changedNode.NodeType}");
 
-                    Visit(node.Left);
+                    if (changedNode.Right.NodeType != ExpressionType.Constant)
+                        throw new NotSupportedException($"Right operand should be constant: {changedNode.NodeType}");
+
+                    Visit(changedNode.Left);
                     _resultStringBuilder.Append("(");
-                    Visit(node.Right);
+                    Visit(changedNode.Right);
                     _resultStringBuilder.Append(")");
                     break;
 
                 default:
-                    throw new NotSupportedException($"Operation '{node.NodeType}' is not supported");
+                    throw new NotSupportedException($"Operation '{changedNode.NodeType}' is not supported");
             };
 
             return node;
